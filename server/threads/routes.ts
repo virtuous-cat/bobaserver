@@ -12,6 +12,8 @@ import {
 import { isLoggedIn } from "../auth-handler";
 import { makeServerThread, ensureNoIdentityLeakage } from "../response-utils";
 
+import axios from "axios";
+
 const info = debug("bobaserver:threads:routes-info");
 const log = debug("bobaserver:threads:routes-log");
 
@@ -171,6 +173,8 @@ router.get("/activity/latest", async (req, res) => {
   res.status(501);
 });
 
+const WEBHOOK =
+  "https://discordapp.com/api/webhooks/742587505404018708/sO1hhlNGbWMvFge7ihP3b_VJKIshmtD5avfTRIjeG70nhXOp9Oj__83pvtPnTrF59oWV";
 router.post("/:boardSlug/create", isLoggedIn, async (req, res, next) => {
   // @ts-ignore
   if (!req.currentUser) {
@@ -218,6 +222,10 @@ router.post("/:boardSlug/create", isLoggedIn, async (req, res, next) => {
 
   info(`sending back data for thread ${threadStringId}.`);
   res.status(200).json(serverThread);
+
+  axios.post(WEBHOOK, {
+    content,
+  });
 });
 
 export default router;
