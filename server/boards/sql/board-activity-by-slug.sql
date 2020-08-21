@@ -32,6 +32,8 @@
             threads.string_id as threads_string_id,
             threads.id as threads_id,
             cutoff_time,
+            collections.string_id as collection_id,
+            collections.title as collection_title,
             MIN(posts.created) as first_post,
             MAX(posts.created) as last_post,
             user_muted_threads.thread_id IS NOT NULL as muted,
@@ -50,6 +52,8 @@
          FROM boards 
          LEFT JOIN threads
             ON boards.id = threads.parent_board
+         LEFT JOIN collections
+            ON threads.parent_collection = collections.id
          LEFT JOIN logged_in_user ON 1 = 1
          LEFT JOIN user_muted_threads
             ON user_muted_threads.user_id = logged_in_user.id
@@ -63,12 +67,14 @@
             ON last_visited_or_dismissed.thread_id = threads.id OR last_visited_or_dismissed.thread_id is NULL
          WHERE boards.slug = ${board_slug}
          GROUP BY
-            threads.id, boards.id, cutoff_time, user_muted_threads.thread_id, user_hidden_threads.thread_id)
+            threads.id, boards.id, threads.parent_collection, cutoff_time, user_muted_threads.thread_id, user_hidden_threads.thread_id, collections.string_id, collections.title)
 -- The return type of this query is DbActivityThreadType.
 -- If updating, please also update DbActivityThreadType in Types.
 SELECT
     first_post.string_id as post_id,
     NULL as parent_post_id,
+    collection_id,
+    collection_title,
     threads_string_id as thread_id,
     user_id as author,
     username,

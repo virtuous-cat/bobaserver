@@ -48,12 +48,26 @@ export interface ServerPostType {
 export interface ServerThreadType {
   posts: ServerPostType[];
   thread_id: string;
+  collection_id: string;
+  collection_title: string;
   thread_direct_threads_amount: number;
   thread_new_posts_amount: number;
   thread_new_comments_amount: number;
   thread_total_comments_amount: number;
   thread_total_posts_amount: number;
   thread_last_activity: string;
+  muted: boolean;
+  hidden: boolean;
+}
+
+export interface ServerCollectionType {
+  title: string;
+  description: string;
+  collection_id: string;
+  collection_new_threads_amount: number;
+  collection_new_updates_amount: number;
+  collection_total_threads_amount: number;
+  collection_last_activity: string;
   muted: boolean;
   hidden: boolean;
 }
@@ -118,6 +132,8 @@ export interface DbCommentType {
 
 export interface DbThreadType {
   thread_id: string;
+  collection_id: string;
+  collection_title: string;
   posts: DbPostType[];
   thread_direct_threads_amount: number;
   thread_new_posts_amount: number;
@@ -133,6 +149,8 @@ export interface DbActivityThreadType {
   post_id: string;
   parent_post_id: null;
   thread_id: string;
+  collection_id: string;
+  collection_title: string;
   author: number;
   username: string;
   user_avatar: string;
