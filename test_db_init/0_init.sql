@@ -120,8 +120,9 @@ CREATE TABLE IF NOT EXISTS collections
 (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     string_id TEXT NOT NULL,
+    parent_board BIGINT REFERENCES boards(id) ON DELETE RESTRICT NOT NULL,
     title TEXT NOT NULL,
-    content_description TEXT NOT NULL,
+    description TEXT NOT NULL,
     /** 
      * Whisper Tags are textual tags that do not get indicized but act as an extra
      * space for comments.
