@@ -10,7 +10,9 @@ const getPostsWithTags = `
             
             first_post_in_thread.id as first_post_in_thread_id,
             ARRAY_AGG (DISTINCT first_post_tags.tag) as all_first_post_in_thread_tags,
-            COUNT (DISTINCT first_post_in_thread_comments) as first_post_in_thread_comment_count
+            COUNT (DISTINCT first_post_child_posts) as first_post_child_posts_count,
+            COUNT (DISTINCT first_post_comments) as first_post_comment_count
+            
                         
         from posts
             LEFT JOIN post_tags on posts.id = post_tags.post_id
@@ -22,7 +24,8 @@ const getPostsWithTags = `
             LEFT JOIN posts as first_post_in_thread on first_post_in_thread.parent_post is NULL AND first_post_in_thread.parent_thread = posts.parent_thread AND first_post_in_thread.id != posts.id
             LEFT JOIN post_tags as first_post_post_tags on first_post_in_thread.id = first_post_post_tags.post_id
             LEFT JOIN tags as first_post_tags on first_post_post_tags.tag_id = first_post_tags.id 
-            LEFT JOIN comments as first_post_in_thread_comments on comments.parent_post = first_post_in_thread.id
+            LEFT JOIN posts as first_post_child_posts on first_post_child_posts.parent_post = first_post_in_thread.id 
+            LEFT JOIN comments as first_post_comments on first_post_comments.parent_post = first_post_in_thread.id
         GROUP BY
             posts.id,
             parent_thread.id,
