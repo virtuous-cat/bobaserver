@@ -228,3 +228,11 @@ INSERT INTO post_tags(post_id, tag_id) VALUES
  (1,5), -- 'Favorite Character to maim' is `bobapost`
  (2,5), -- 'Revolver Ocelot?' is `bobapost`
  (3,5); -- 'Kermit the Frog?' is `bobapost`
+
+INSERT INTO content_warnings(warning) VALUES
+  ('gore'),
+  ('guns');
+
+INSERT INTO post_warnings(post_id, warning_id) VALUES
+  (1,1), -- 'Favorite character to maim?' has 'gore'
+  (2,2); -- 'Revolver Ocelot?' has 'guns'

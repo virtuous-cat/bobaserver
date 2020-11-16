@@ -5,7 +5,8 @@ const getPostsWithTags = `
             posts.id as posts_id,
 
             post_identity.*,
-            ARRAY_AGG (DISTINCT tags.tag) as all_tags,
+            ARRAY_AGG (DISTINCT tags.tag) as all_tags, 
+            ARRAY_AGG (DISTINCT content_warnings.warning) as post_content_warnings,
             COUNT (DISTINCT child_posts.id) as child_post_count,
             COUNT (DISTINCT comments.id) as child_comment_count,
 
@@ -13,6 +14,7 @@ const getPostsWithTags = `
             
             first_post_in_thread.id as first_post_in_thread_id,
             ARRAY_AGG (DISTINCT first_post_tags.tag) as all_first_post_in_thread_tags,
+            ARRAY_AGG (DISTINCT first_post_content_warnings.warning) as first_post_content_warnings,
             COUNT (DISTINCT first_post_child_posts) as first_post_child_posts_count,
             COUNT (DISTINCT first_post_comments) as first_post_comment_count
             
@@ -47,7 +49,7 @@ const getPostsWithTags = `
             post_identity.role_id
       ) as posts_with_tags
     WHERE
-      posts_id = 3;
+      posts_id = 2;
     
 
 
