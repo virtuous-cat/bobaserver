@@ -1,19 +1,18 @@
 const getPostsWithTags = `
     select posts_with_tags.* FROM (
         select
-            posts.*,
-            posts.id as posts_id,
-
-            post_identity.*,
-            ARRAY_AGG (DISTINCT tags.tag) as all_tags, 
+            json_agg(posts.*) as post_info,
+            posts.id as post_id,
+            json_agg(post_identity.*) as post_identity,
+            ARRAY_AGG (DISTINCT tags.tag) as post_tags, 
             ARRAY_AGG (DISTINCT content_warnings.warning) as post_content_warnings,
-            COUNT (DISTINCT child_posts.id) as child_post_count,
-            COUNT (DISTINCT comments.id) as child_comment_count,
+            COUNT (DISTINCT child_posts.id) as child_posts_count,
+            COUNT (DISTINCT comments.id) as child_comments_count,
 
-            parent_thread.*,
+            json_agg(parent_thread.*) as parent_thread,
             
-            first_post_in_thread.id as first_post_in_thread_id,
-            ARRAY_AGG (DISTINCT first_post_tags.tag) as all_first_post_in_thread_tags,
+            json_agg(first_post_in_thread.*) as first_post_in_thread_info,
+            ARRAY_AGG (DISTINCT first_post_tags.tag) as first_post_in_thread_tags,
             ARRAY_AGG (DISTINCT first_post_content_warnings.warning) as first_post_content_warnings,
             COUNT (DISTINCT first_post_child_posts) as first_post_child_posts_count,
             COUNT (DISTINCT first_post_comments) as first_post_comment_count
@@ -49,6 +48,7 @@ const getPostsWithTags = `
             post_identity.role_id
       ) as posts_with_tags    
     WHERE
+      posts_with_tags.post_id = 2
       all_tags @> $/includeTags/ AND
       NOT all_tags && $/excludeTags/
 `
