@@ -1,17 +1,18 @@
 const getPostsWithTags = `
-    select posts_with_tags.* FROM (
+    select posts_with_tags.* FROM (  
         select
-            json_agg(posts.*) as post_info,
+            row_to_json(posts.*) as post_info,
             posts.id as post_id,
-            json_agg(post_identity.*) as post_identity,
+            row_to_json(post_identity.*) as post_identity,
             ARRAY_AGG (DISTINCT tags.tag) as post_tags, 
             ARRAY_AGG (DISTINCT content_warnings.warning) as post_content_warnings,
             COUNT (DISTINCT child_posts.id) as child_posts_count,
             COUNT (DISTINCT comments.id) as child_comments_count,
 
-            json_agg(parent_thread.*) as parent_thread,
+            row_to_json(parent_thread.*) as parent_thread,
             
-            json_agg(first_post_in_thread.*) as first_post_in_thread_info,
+            row_to_json(first_post_in_thread.*) as first_post_in_thread_info,
+            row_to_json(first_post_identity) as first_post_identity_info,
             ARRAY_AGG (DISTINCT first_post_tags.tag) as first_post_in_thread_tags,
             ARRAY_AGG (DISTINCT first_post_content_warnings.warning) as first_post_content_warnings,
             COUNT (DISTINCT first_post_child_posts) as first_post_child_posts_count,
@@ -40,12 +41,11 @@ const getPostsWithTags = `
             LEFT JOIN content_warnings as first_post_content_warnings on first_post_post_warnings.warning_id = first_post_content_warnings.id
         GROUP BY
             posts.id,
+            first_post_identity.*,
             parent_thread.id,
             first_post_in_thread.id,
-            post_identity.thread_id,
-            post_identity.user_id,
-            post_identity.identity_id,
-            post_identity.role_id
+            post_identity.*
+            
       ) as posts_with_tags    
     WHERE
       posts_with_tags.post_id = 2
