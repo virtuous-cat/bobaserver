@@ -16,10 +16,12 @@ const getPostsWithTags = `
             ARRAY_AGG (DISTINCT first_post_tags.tag) as first_post_in_thread_tags,
             ARRAY_AGG (DISTINCT first_post_content_warnings.warning) as first_post_content_warnings,
             COUNT (DISTINCT first_post_child_posts) as first_post_child_posts_count,
-            COUNT (DISTINCT first_post_comments) as first_post_comment_count
+            COUNT (DISTINCT first_post_comments) as first_post_comment_count,
             
-                        
+            COALESCE(logged_in_user.id = posts.author, FALSE) as self
+
         from posts
+            LEFT JOIN users as logged_in_user on logged_in_user.firebase_id  = 'c6HimTlg2RhVH3fC1psXZORdLcx2'
             LEFT JOIN post_tags on posts.id = post_tags.post_id
             LEFT JOIN tags on post_tags.tag_id = tags.id
             LEFT JOIN threads as parent_thread on parent_thread.id = posts.parent_thread
@@ -41,6 +43,7 @@ const getPostsWithTags = `
             LEFT JOIN content_warnings as first_post_content_warnings on first_post_post_warnings.warning_id = first_post_content_warnings.id
         GROUP BY
             posts.id,
+            logged_in_user.id,
             first_post_identity.*,
             parent_thread.id,
             first_post_in_thread.id,
@@ -48,7 +51,7 @@ const getPostsWithTags = `
             
       ) as posts_with_tags    
     WHERE
-      posts.id = 2      
+      post_id = 2     
 
 
 
