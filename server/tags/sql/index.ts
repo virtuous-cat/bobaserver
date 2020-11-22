@@ -24,7 +24,7 @@ const getPostsWithTags = `
             COALESCE(is_friend.friend, FALSE) as friend
 
         from posts
-            LEFT JOIN users as logged_in_user on logged_in_user.firebase_id  = 'c6HimTlg2RhVH3fC1psXZORdLcx2'
+            LEFT JOIN users as logged_in_user on logged_in_user.firebase_id  = ${firebase_id}
             LEFT JOIN LATERAL (
                SELECT true as friend 
                FROM friends 
@@ -62,14 +62,11 @@ const getPostsWithTags = `
             first_post_in_thread.id,
             post_identity.*,
             is_friend.friend,
-            post_secret_identity.*
+            post_secret_identity.*,
+            first_post_secret_identity.*
             
       ) as posts_with_tags    
     WHERE
-      post_id = 1;     
-
-
-
       post_tags @> $/includeTags/ AND
       NOT post_tags && $/excludeTags/
 `

@@ -39,6 +39,11 @@ VALUES
     ('DragonFucker', 'https://pbs.twimg.com/profile_images/473496567366705152/JyHRKG7g.jpeg'), 
     ('Outdated Meme', 'outdated-meme.png');
 
+INSERT INTO friends(user_id, friend_id)
+VALUES
+    (1, 2),
+    (2, 1);
+
 WITH
   new_thread_id AS
     (INSERT INTO threads(string_id, parent_board)
