@@ -18,10 +18,19 @@ const getPostsWithTags = `
             COUNT (DISTINCT first_post_child_posts) as first_post_child_posts_count,
             COUNT (DISTINCT first_post_comments) as first_post_comment_count,
             
-            COALESCE(logged_in_user.id = posts.author, FALSE) as self
+            COALESCE(logged_in_user.id = posts.author, FALSE) as self,
+            COALESCE(is_friend.friend, FALSE) as friend
 
         from posts
             LEFT JOIN users as logged_in_user on logged_in_user.firebase_id  = 'c6HimTlg2RhVH3fC1psXZORdLcx2'
+            LEFT JOIN LATERAL (
+               SELECT true as friend 
+               FROM friends 
+               WHERE friends.user_id = (SELECT id FROM users WHERE users.id = logged_in_user.id ) 
+               AND friends.friend_id = posts.id 
+               LIMIT 1) as is_friend ON 1=1 
+
+
             LEFT JOIN post_tags on posts.id = post_tags.post_id
             LEFT JOIN tags on post_tags.tag_id = tags.id
             LEFT JOIN threads as parent_thread on parent_thread.id = posts.parent_thread
@@ -47,7 +56,8 @@ const getPostsWithTags = `
             first_post_identity.*,
             parent_thread.id,
             first_post_in_thread.id,
-            post_identity.*
+            post_identity.*,
+            is_friend.friend
             
       ) as posts_with_tags    
     WHERE
