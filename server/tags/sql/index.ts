@@ -27,7 +27,7 @@ const getPostsWithTags = `
                SELECT true as friend 
                FROM friends 
                WHERE friends.user_id = (SELECT id FROM users WHERE users.id = logged_in_user.id ) 
-               AND friends.friend_id = posts.id 
+               AND friends.friend_id = posts.author 
                LIMIT 1) as is_friend ON 1=1 
 
 
@@ -61,7 +61,7 @@ const getPostsWithTags = `
             
       ) as posts_with_tags    
     WHERE
-      post_id = 2     
+      post_id = 1;     
 
 
 
