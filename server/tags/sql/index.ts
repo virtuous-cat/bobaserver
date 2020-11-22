@@ -48,8 +48,10 @@ const getPostsWithTags = `
             
       ) as posts_with_tags    
     WHERE
-      posts_with_tags.post_id = 2
-      all_tags @> $/includeTags/ AND
-      NOT all_tags && $/excludeTags/
+      post_tags @> $/includeTags/ AND
+      NOT post_tags && $/excludeTags/
 `
 
+export default {
+  getPostsWithTags
+}
