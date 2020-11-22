@@ -48,6 +48,10 @@ const getPostsWithTags = `
             
       ) as posts_with_tags    
     WHERE
+      posts.id = 2      
+
+
+
       post_tags @> $/includeTags/ AND
       NOT post_tags && $/excludeTags/
 `
