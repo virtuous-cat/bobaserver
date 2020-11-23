@@ -23,6 +23,13 @@ describe("Tests tags REST API", () => {
     authStub.callsFake((req, res, next) => {
       next();
     });
+    authStub.callsFake((req, res, next) => {
+      log("Overriding current user");
+      // @ts-ignore
+      req.currentUser = { uid: "fb3" };
+      log(req)
+      next();
+    });
     app = express();
     app.use(router);
     listener = app.listen(4000, () => {
@@ -36,35 +43,26 @@ describe("Tests tags REST API", () => {
 
   
   it("should work with both one tags and one excludes", async () => {
-    // @ts-ignore
-    authStub.callsFake((req, res, next) => {
-      log("Overriding current user");
-      // @ts-ignore
-      req.currentUser = { uid: "fb2" };
-      log(req)
-      next();
-    });
-    // @ts-ignore
     const res = await request(app).get("/search?tags=evil&exclude=oddly+specific");
     expect(res.status).to.equal(200);
     expect(res.body.length).to.equal(1);
     expect(res.body[0].post_info.post_id).to.equal(FAVE_TO_MAIM_POST_ID); // favorite character to maim?
   });
-  /*
+  
 
   it("should work with one tags only", async () => {
     const res = await request(app).get("/search?tags=evil");
     expect(res.status).to.equal(200);
     expect(res.body.length).to.equal(2);
 
-    const responsePostIds = new Set(res.body.map( (r: any) => r.string_id ));
+    const responsePostIds = new Set(res.body.map( (r: any) => r.post_info.post_id ));
 
     expect(responsePostIds.has(FAVE_TO_MAIM_POST_ID)).to.be.true;
     expect(responsePostIds.has(REVOLVER_OCELOT_POST_ID)).to.be.true;
   });
-   */
+   
 
-  /*
+  
   it("should send 400 if no tags and exclude", async () => {
     const res = await request(app).get("/search?exclude=evil");
     expect(res.status).to.equal(400);

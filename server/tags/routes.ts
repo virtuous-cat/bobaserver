@@ -44,8 +44,6 @@ router.get("/search", isLoggedIn, async (req, res) => {
     includeTags,
     excludeTags});
 
-  log('why you gotta be so rude')
-
   for(let postWithTags of postsWithTags) {
     postWithTags.post_info = makeServerPost(postWithTags.post_info);
     postWithTags.parent_post_info = makeServerPost(postWithTags.parent_post_info)
@@ -53,7 +51,7 @@ router.get("/search", isLoggedIn, async (req, res) => {
     ensureNoIdentityLeakage(postWithTags.parent_post_info);
   };
 
-  log('dont you know im human too?');
+  log(postsWithTags);
 
   return res.status(200).json(postsWithTags);
 });
