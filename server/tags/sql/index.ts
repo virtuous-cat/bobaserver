@@ -24,7 +24,7 @@ const getPostsWithTags = `
             COALESCE(is_friend.friend, FALSE) as friend
 
         from posts
-            LEFT JOIN users as logged_in_user on logged_in_user.firebase_id  = ${firebase_id}
+            LEFT JOIN users as logged_in_user on logged_in_user.firebase_id  = $/firebase_id/
             LEFT JOIN LATERAL (
                SELECT true as friend 
                FROM friends 

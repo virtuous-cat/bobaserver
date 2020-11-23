@@ -1,12 +1,16 @@
 import "mocha";
 import { expect } from "chai";
 import request from "supertest";
+import * as authHandler from "../../auth-handler";
+import sinon from "sinon";
 import express, { Express } from "express";
-import router from "../routes";
 import { Server } from "http";
+
 
 import debug from "debug";
 const log = debug("bobaserver:tags:routes");
+const authStub = sinon.stub(authHandler, "isLoggedIn");
+import router from "../routes";
 
 const FAVE_TO_MAIM_POST_ID = "11b85dac-e122-40e0-b09a-8829c5e0250e";
 const REVOLVER_OCELOT_POST_ID = "619adf62-833f-4bea-b591-03e807338a8e";
@@ -16,6 +20,9 @@ describe("Tests tags REST API", () => {
   let app: Express;
   let listener: Server;
   beforeEach(function (done) {
+    authStub.callsFake((req, res, next) => {
+      next();
+    });
     app = express();
     app.use(router);
     listener = app.listen(4000, () => {
@@ -23,11 +30,21 @@ describe("Tests tags REST API", () => {
     });
   });
   afterEach(function (done) {
+    authStub.restore();
     listener.close(done);
   });
 
   
   it("should work with both one tags and one excludes", async () => {
+    // @ts-ignore
+    authStub.callsFake((req, res, next) => {
+      log("Overriding current user");
+      // @ts-ignore
+      req.currentUser = { uid: "fb2" };
+      log(req)
+      next();
+    });
+    // @ts-ignore
     const res = await request(app).get("/search?tags=evil&exclude=oddly+specific");
     expect(res.status).to.equal(200);
     expect(res.body.length).to.equal(1);
@@ -47,6 +64,7 @@ describe("Tests tags REST API", () => {
   });
    */
 
+  /*
   it("should send 400 if no tags and exclude", async () => {
     const res = await request(app).get("/search?exclude=evil");
     expect(res.status).to.equal(400);

@@ -1,5 +1,6 @@
 import debug from "debug";
 import express from "express";
+import { isLoggedIn } from "../auth-handler";
 import {
   getPostsWithTags
 } from "./queries"; 
@@ -20,7 +21,7 @@ function querystringParamToArray(param: any): string[] {
   }
 }
 
-router.get("/search", async (req, res) => {
+router.get("/search", isLoggedIn, async (req, res) => {
   const includeTags = querystringParamToArray(req.query.tags);
   const excludeTags = querystringParamToArray(req.query.exclude);
 
@@ -28,8 +29,16 @@ router.get("/search", async (req, res) => {
     res.sendStatus(400);
     return;
   }
-
-  const postsWithTags = await getPostsWithTags({includeTags, excludeTags});
+  // @ts-ignore
+  const firebase_id = req.currentUser?.uid;
+  if(!firebase_id) {
+    res.sendStatus(401);
+    return
+  }
+  const postsWithTags = await getPostsWithTags({
+    firebase_id,
+    includeTags,
+    excludeTags});
 
   return res.status(200).json(postsWithTags);
 });
