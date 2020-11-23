@@ -2,6 +2,7 @@ const getPostsWithTags = `
     select posts_with_tags.* FROM (  
         select
             posts.id as post_id,
+            ARRAY_AGG (DISTINCT tags.tag) as index_tags,
             row_to_json(parent_thread.*) as parent_thread,
             json_build_object(
               'post_id', posts.string_id,
@@ -42,7 +43,7 @@ const getPostsWithTags = `
             ) as parent_post_info           
 
         from posts
-            LEFT JOIN users as logged_in_user on logged_in_user.firebase_id  = 'fb2'
+            LEFT JOIN users as logged_in_user on logged_in_user.firebase_id  = $/firebase_id/
             LEFT JOIN LATERAL (
                SELECT true as friend 
                FROM friends 
@@ -97,9 +98,8 @@ const getPostsWithTags = `
             
       ) as posts_with_tags    
     WHERE
-      post_id = 2;
-      post_tags @> $/includeTags/ AND
-      NOT post_tags && $/excludeTags/
+      index_tags @> $/includeTags/ AND
+      NOT index_tags && $/excludeTags/
 `
 
 export default {

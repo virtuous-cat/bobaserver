@@ -48,7 +48,7 @@ describe("Tests tags REST API", () => {
     const res = await request(app).get("/search?tags=evil&exclude=oddly+specific");
     expect(res.status).to.equal(200);
     expect(res.body.length).to.equal(1);
-    expect(res.body[0].post_info.string_id).to.equal(FAVE_TO_MAIM_POST_ID); // favorite character to maim?
+    expect(res.body[0].post_info.post_id).to.equal(FAVE_TO_MAIM_POST_ID); // favorite character to maim?
   });
   /*
 

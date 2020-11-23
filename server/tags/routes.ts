@@ -2,6 +2,10 @@ import debug from "debug";
 import express from "express";
 import { isLoggedIn } from "../auth-handler";
 import {
+  makeServerPost,
+  ensureNoIdentityLeakage
+} from "../response-utils";
+import {
   getPostsWithTags
 } from "./queries"; 
 
@@ -39,6 +43,17 @@ router.get("/search", isLoggedIn, async (req, res) => {
     firebase_id,
     includeTags,
     excludeTags});
+
+  log('why you gotta be so rude')
+
+  for(let postWithTags of postsWithTags) {
+    postWithTags.post_info = makeServerPost(postWithTags.post_info);
+    postWithTags.parent_post_info = makeServerPost(postWithTags.parent_post_info)
+    ensureNoIdentityLeakage(postWithTags.post_info);
+    ensureNoIdentityLeakage(postWithTags.parent_post_info);
+  };
+
+  log('dont you know im human too?');
 
   return res.status(200).json(postsWithTags);
 });
