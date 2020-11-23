@@ -39,19 +39,7 @@ const getPostsWithTags = `
               'category_tags', ARRAY_AGG (DISTINCT first_post_content_warnings.warning),
               'child_posts_count', COUNT (DISTINCT first_post_child_posts.id),
               'child_comments_count', COUNT (DISTINCT first_post_comments.id)
-            ) as parent_post_info,
-            
-            row_to_json(first_post_in_thread.*) as first_post_in_thread_info,
-            row_to_json(first_post_in_thread_user.*) as first_post_in_thread_user_info,
-            row_to_json(first_post_identity) as first_post_thread_identity_info,
-            row_to_json(first_post_secret_identity.*) as first_post_secret_indentity_info,
-            ARRAY_AGG (DISTINCT first_post_tags.tag) as first_post_in_thread_tags,
-            ARRAY_AGG (DISTINCT first_post_content_warnings.warning) as first_post_content_warnings,
-            COUNT (DISTINCT first_post_child_posts) as first_post_child_posts_count,
-            COUNT (DISTINCT first_post_comments) as first_post_comment_count,
-            
-            COALESCE(logged_in_user.id = posts.author, FALSE) as self,
-            COALESCE(is_friend.friend, FALSE) as friend
+            ) as parent_post_info           
 
         from posts
             LEFT JOIN users as logged_in_user on logged_in_user.firebase_id  = 'fb2'
@@ -92,17 +80,11 @@ const getPostsWithTags = `
                AND friends.friend_id = first_post_in_thread.author 
                LIMIT 1) as first_post_in_thread_is_friend ON 1=1 
         GROUP BY
+            is_friend.friend,
             posts.id,
             logged_in_user.id,
-            first_post_identity.*,
             parent_thread.id,
             first_post_in_thread.id,
-            post_identity.*,
-            is_friend.friend,
-            post_secret_identity.*,
-            first_post_secret_identity.*,
-            posts_user.*,
-            first_post_in_thread_user.*,
             posts_user.username,
             posts_user.avatar_reference_id,
             post_secret_identity.display_name,
