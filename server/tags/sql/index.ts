@@ -22,6 +22,25 @@ const getPostsWithTags = `
               'child_comments_count', COUNT (DISTINCT comments.id)
             ) as post_info,
             
+            json_build_object(
+              'post_id', first_post_in_thread.string_id,
+              'author', first_post_in_thread.author,
+              'created', TO_CHAR(first_post_in_thread.created, 'YYYY-MM-DD"T"HH24:MI:SS'),
+              'content', first_post_in_thread.content,
+              'options', first_post_in_thread.options,
+              'type', first_post_in_thread.type,
+              'username', first_post_in_thread_user.username,
+              'user_avatar', first_post_in_thread_user.avatar_reference_id,
+              'secret_identity_name', first_post_secret_identity.display_name,
+              'secret_identity_avatar', first_post_secret_identity.avatar_reference_id,
+              'self', COALESCE(logged_in_user.id = first_post_in_thread.author, FALSE),
+              'friend', COALESCE(first_post_in_thread_is_friend.friend, FALSE),
+              'index_tags',  ARRAY_AGG (DISTINCT first_post_tags.tag),
+              'category_tags', ARRAY_AGG (DISTINCT first_post_content_warnings.warning),
+              'child_posts_count', COUNT (DISTINCT first_post_child_posts.id),
+              'child_comments_count', COUNT (DISTINCT first_post_comments.id)
+            ) as parent_post_info,
+            
             row_to_json(first_post_in_thread.*) as first_post_in_thread_info,
             row_to_json(first_post_in_thread_user.*) as first_post_in_thread_user_info,
             row_to_json(first_post_identity) as first_post_thread_identity_info,
@@ -65,6 +84,13 @@ const getPostsWithTags = `
             LEFT JOIN secret_identities as first_post_secret_identity on first_post_identity.identity_id = first_post_secret_identity.id
             LEFT JOIN post_warnings as first_post_post_warnings on first_post_in_thread.id = first_post_post_warnings.post_id
             LEFT JOIN content_warnings as first_post_content_warnings on first_post_post_warnings.warning_id = first_post_content_warnings.id
+
+            LEFT JOIN LATERAL (
+               SELECT true as friend 
+               FROM friends 
+               WHERE friends.user_id = (SELECT id FROM users WHERE users.id = logged_in_user.id ) 
+               AND friends.friend_id = first_post_in_thread.author 
+               LIMIT 1) as first_post_in_thread_is_friend ON 1=1 
         GROUP BY
             posts.id,
             logged_in_user.id,
@@ -80,7 +106,12 @@ const getPostsWithTags = `
             posts_user.username,
             posts_user.avatar_reference_id,
             post_secret_identity.display_name,
-            post_secret_identity.avatar_reference_id
+            post_secret_identity.avatar_reference_id,
+            first_post_in_thread_user.username,
+            first_post_in_thread_user.avatar_reference_id,
+            first_post_secret_identity.display_name,
+            first_post_secret_identity.avatar_reference_id,
+            first_post_in_thread_is_friend.friend
             
       ) as posts_with_tags    
     WHERE
