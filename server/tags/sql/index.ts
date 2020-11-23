@@ -2,6 +2,7 @@ const getPostsWithTags = `
     select posts_with_tags.* FROM (  
         select
             posts.id as post_id,
+            row_to_json(parent_thread.*) as parent_thread,
             json_build_object(
               'post_id', posts.string_id,
               'author', posts.author,
@@ -16,24 +17,10 @@ const getPostsWithTags = `
               'self', COALESCE(logged_in_user.id = posts.author, FALSE),
               'friend', COALESCE(is_friend.friend, FALSE),
               'index_tags',  ARRAY_AGG (DISTINCT tags.tag),
-              'category_tags', ARRAY_AGG (DISTINCT content_warnings.warning) 
-              
+              'category_tags', ARRAY_AGG (DISTINCT content_warnings.warning),
+              'child_posts_count', COUNT (DISTINCT child_posts.id),
+              'child_comments_count', COUNT (DISTINCT comments.id)
             ) as post_info,
-            json_build_object(
-              'post_info', row_to_json(posts.*),
-              'posts_user_info', row_to_json(posts_user.*),
-              'lil_nesty', json_build_object(
-                  'posts_info', row_to_json(posts.*) 
-              )
-            ) as hurr_durr,
-            row_to_json(post_identity.*) as post_thread_identity_info,
-            row_to_json(post_secret_identity.*) as post_secret_indentity_info,
-            ARRAY_AGG (DISTINCT tags.tag) as post_tags, 
-            ARRAY_AGG (DISTINCT content_warnings.warning) as post_content_warnings,
-            COUNT (DISTINCT child_posts.id) as child_posts_count,
-            COUNT (DISTINCT comments.id) as child_comments_count,
-
-            row_to_json(parent_thread.*) as parent_thread,
             
             row_to_json(first_post_in_thread.*) as first_post_in_thread_info,
             row_to_json(first_post_in_thread_user.*) as first_post_in_thread_user_info,
@@ -91,7 +78,9 @@ const getPostsWithTags = `
             posts_user.*,
             first_post_in_thread_user.*,
             posts_user.username,
-            posts_user.avatar_reference_id
+            posts_user.avatar_reference_id,
+            post_secret_identity.display_name,
+            post_secret_identity.avatar_reference_id
             
       ) as posts_with_tags    
     WHERE
