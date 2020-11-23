@@ -81,19 +81,19 @@ const getPostsWithTags = `
                LIMIT 1) as first_post_in_thread_is_friend ON 1=1 
         GROUP BY
             is_friend.friend,
-            posts.id,
             logged_in_user.id,
             parent_thread.id,
-            first_post_in_thread.id,
+            posts.id,
             posts_user.username,
             posts_user.avatar_reference_id,
             post_secret_identity.display_name,
             post_secret_identity.avatar_reference_id,
+            first_post_in_thread_is_friend.friend,
+            first_post_in_thread.id,
             first_post_in_thread_user.username,
             first_post_in_thread_user.avatar_reference_id,
             first_post_secret_identity.display_name,
-            first_post_secret_identity.avatar_reference_id,
-            first_post_in_thread_is_friend.friend
+            first_post_secret_identity.avatar_reference_id
             
       ) as posts_with_tags    
     WHERE
