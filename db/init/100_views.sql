@@ -132,3 +132,86 @@ LEFT JOIN user_hidden_threads uht
  LEFT JOIN thread_notification_dismissals tnd
     ON tnd.thread_id = threads.id AND tnd.user_id = users.id
 );
+
+CREATE VIEW comment_details AS (
+SELECT
+    comments.id as comment_id,
+    comments.string_id as comment_string_id,
+    parent_thread.id as parent_thread_id,
+    parent_thread.string_id as parent_thread_string_id,
+    parent_post.id as parent_post_id,
+    parent_post.string_id as parent_post_string_id,
+    parent_comment.id as parent_comment_id,
+    parent_comment.string_id as parent_comment_string_id,
+    chain_parent_comment.id as chain_parent_comment_id,
+    chain_parent_comment.string_id as chain_parent_comment_string_id,
+    author,
+    username,
+    user_avatar,
+    secret_identity_name,
+    secret_identity_avatar,
+    secret_identity_color,
+    accessory_avatar,
+    content,
+    created,
+    anonymity_type
+FROM comments
+LEFT JOIN LATERAL (
+	SELECT id, string_id FROM threads WHERE threads.id = comments.parent_thread
+) parent_thread ON TRUE
+LEFT JOIN LATERAL (
+	SELECT id, string_id FROM posts WHERE posts.id = comments.parent_post
+) parent_post ON TRUE
+LEFT JOIN LATERAL (
+	SELECT id, string_id FROM comments c WHERE c.id = comments.parent_comment
+) parent_comment ON comments.parent_comment IS NOT NULL
+LEFT JOIN LATERAL (
+	SELECT id, string_id FROM comments c WHERE c.id = comments.chain_parent_comment
+) chain_parent_comment  ON comments.chain_parent_comment IS NOT NULL
+LEFT JOIN thread_identities
+    ON thread_identities.thread_id = comments.parent_thread AND thread_identities.user_id = comments.author
+);
+
+CREATE VIEW post_details AS (
+SELECT 
+ posts.id AS post_id,
+ posts.string_id as post_string_id,
+ parent_thread.id AS parent_thread_id,
+ parent_thread.string_id as parent_thread_string_id,
+ parent_post.id as parent_post_id,
+ parent_post.string_id as parent_post_string_id,
+ posts.author,
+ thread_identities.username,
+ thread_identities.user_avatar,
+ thread_identities.secret_identity_name,
+ thread_identities.secret_identity_avatar,
+ thread_identities.secret_identity_color,
+ thread_identities.accessory_avatar,
+ posts.created,
+ posts.content,
+ posts.options,
+ posts.type,
+  COALESCE(posts.whisper_tags, '{}') AS whisper_tags,
+  array(
+      SELECT tag FROM post_tags 
+      LEFT JOIN tags
+      ON post_tags.tag_id = tags.id WHERE post_tags.post_id = posts.id) as index_tags,
+  array(
+      SELECT category FROM post_categories 
+      LEFT JOIN categories
+      ON post_categories.category_id = categories.id WHERE post_categories.post_id = posts.id) as category_tags,
+  array(
+      SELECT warning FROM post_warnings 
+      LEFT JOIN content_warnings
+      ON post_warnings.warning_id = content_warnings.id WHERE post_warnings.post_id = posts.id) as content_warnings,
+  posts.anonymity_type
+FROM posts
+LEFT JOIN LATERAL (
+  SELECT id, string_id FROM threads WHERE threads.id = posts.parent_thread
+) parent_thread ON TRUE
+LEFT JOIN LATERAL (
+  SELECT id, string_id FROM posts p WHERE p.id = posts.parent_post
+) parent_post ON parent_post IS NOT NULL
+LEFT JOIN thread_identities
+    ON thread_identities.thread_id = posts.parent_thread AND thread_identities.user_id = posts.author
+);

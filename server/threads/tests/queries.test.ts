@@ -115,7 +115,7 @@ describe("threads queries", () => {
               comment_id: "46a16199-33d1-48c2-bb79-4d4095014688",
               is_new: false,
               is_own: true,
-              parent_post: "29d1b2da-3289-454a-9089-2ed47db4967b",
+              parent_post: "b95bb260-eae0-456c-a5d0-8ae9e52608d8",
             },
             {
               anonymity_type: "strangers",
@@ -137,7 +137,7 @@ describe("threads queries", () => {
               comment_id: "89fc3682-cb74-43f9-9a63-bd97d0f59bb9",
               is_new: false,
               is_own: true,
-              parent_post: "29d1b2da-3289-454a-9089-2ed47db4967b",
+              parent_post: "b95bb260-eae0-456c-a5d0-8ae9e52608d8",
             },
           ],
           content: '[{"insert":"Kermit the Frog"}]',
