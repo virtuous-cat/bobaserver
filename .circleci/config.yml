@@ -16,6 +16,9 @@ jobs:
       - run:
           name: run test
           command: docker-compose -f docker-compose.test.yml run --rm test
+      - run:
+          name: see files (2)
+          command: ls -la
       - store_test_results:
           path: ./reports/junit/
       - store_artifacts:
